@@ -8,7 +8,7 @@ from Courses.serializers import CourseSerializer
 
 # API views
 @csrf_exempt
-@api_view(['POST', 'GET', 'PUT', 'DELETE'])
+@api_view(['POST', 'GET', 'DELETE'])
 def course_api(request, id=0):
     #Create
     if request.method == 'POST':
@@ -19,10 +19,12 @@ def course_api(request, id=0):
         if course_serializer.is_valid():
             course_serializer.save()
             response_data = {'mensaje': f'Curso agregado'}
+            status = 200
         else:
             response_data = {'mensaje': f'Error al guardar el curso'}
+            status = 400
 
-        return JsonResponse(response_data, safe=False)
+        return JsonResponse(response_data, safe=False, status=status)
 
     # Read
     elif request.method == 'GET':
@@ -42,28 +44,12 @@ def course_api(request, id=0):
             course_serializer = CourseSerializer(course, many=True)
             return JsonResponse(course_serializer.data, safe=False, status=200)
 
-    # Update
-    if request.method == 'PUT':
-
-        try: # Now it can update the fields trailer_video_url and course_image_url
-            course = Course.objects.get(id=request.data['id'])
-            course_serializer = CourseSerializer(course, data=request.data, partial=True)
-
-            if course_serializer.is_valid():
-                course_serializer.save()
-                return JsonResponse({"message": "Curso actualizado"}, safe=False, status=200)
-
-        except Course.DoesNotExist:
-            return JsonResponse({"error": "Curso no encontrado"}, safe=False, status=404)
-
-        return JsonResponse({"error": "Error al actualizar curso"}, safe=False, status=400)
-
     # Delete
     elif request.method == 'DELETE':
         try:
             course = Course.objects.get(id=id)
             course.delete()
-            return JsonResponse("Curso eliminado", safe=False)
+            return JsonResponse("Curso eliminado", safe=False, status=200)
 
         except Course.DoesNotExist:
             return JsonResponse("Curso no encontrado", safe=False, status=404)
@@ -109,7 +95,7 @@ def recently_added_courses(request):
     if request.method == 'GET':
         try:
             # Get the last 3 courses added
-            courses = Course.objects.order_by('-id')[:3]
+            courses = Course.objects.order_by('-id')[:5]
 
             # Reverse the order of the courses
             courses = courses[::-1]

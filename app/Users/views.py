@@ -74,7 +74,7 @@ def user_api(request):
 
                 if user_serializer.is_valid():
                     user_serializer.save()
-                    return JsonResponse("Cursos del usuario actualizados", safe=False)
+                    return JsonResponse("Nuevo curso inscrito agregado", safe=False)
 
             # Update the rest of the user information
             else:
