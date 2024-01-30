@@ -184,11 +184,73 @@
   Status: 404 -> Usuario no encontrado.
   ```
 
-- **Verificar correo electrónico del usuario**
+- `http://127.0.0.1:8000/user/set-email-verification/`
   - Método: `POST`
-  - Ruta: `/user/set-email-verification/`
   - Descripción: Establecer la verificación del correo electrónico del usuario.
-  - Se envía el `email` en formato JSON.
+
+```bash
+  # Entrada
+{
+  "email": ""
+}
+
+  # Salida
+  Status: 200 -> Correo electrónico verificado.
+  Status: 400 -> Correo electrónico inválido.
+  Status: 404 -> Usuario no encontrado.
+  ```
+
+- `http://127.0.0.1:8000/user/contact-with-us/`
+  - Método: `POST`
+  - Descripción: Enviar mensaje para contacto con equipo de Virtual-POLI
+
+```bash
+  # Entrada
+{
+  "name": "",
+  "email": "",
+  "message": ""
+}
+
+  # Salida
+  Status: 200 -> Correo electrónico enviado.
+  Status: 400 -> Correo electrónico inválido.
+  ```
+
+- `http://127.0.0.1:8000/user/send-email-to-approve-teacher/`
+  - Método: `PUT`
+  - Descripción: Enviar correo para aprobación de ser un instructor.
+  - Se debe enviar el `Token de Autenticación`.
+
+```bash
+  # Entrada
+{
+  "approve_teacher": "",
+  "approve_teacher_email": ""
+}
+
+  # Salida
+  Status: 200 -> Correo electrónico enviado.
+  Status: 400 -> Correo electrónico inválido.
+  Status: 401 -> Acceso no autorizado.
+  Status: 404 -> Usuario no encontrado.
+  ```
+
+- `http://127.0.0.1:8000/user/be-an-instructor/`
+  - Método: `PUT`
+  - Descripción: Actualizar el rol del estudiante.
+
+```bash
+  # Entrada
+{
+  "email": ""
+}
+
+  # Salida
+  Status: 200 -> Rol del estudiante actualizado.
+  Status: 400 -> Correo electrónico inválido.
+  Status: 404 -> Usuario no encontrado.
+  ```
 
 ## Instructor
 
