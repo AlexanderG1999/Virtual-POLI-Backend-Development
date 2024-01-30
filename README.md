@@ -1,6 +1,6 @@
 # PUNTOS DE ACCESO
 
-## Usuario
+## Usuarios
 
 - `http://127.0.0.1:8000/user/`
   - Métodos: `GET`, `PUT`, `DELETE`
@@ -252,177 +252,227 @@
   Status: 404 -> Usuario no encontrado.
   ```
 
-## Instructor
-
-- **Convertirse en instructor**
-  - Método: `PUT`
-  - Ruta: `/user/be-an-instructor/`
-  - Descripción: Solicitar convertirse en instructor en la plataforma.
-
-- **Obtener perfil del instructor**
+- `http://127.0.0.1:8000/user/get-user-profile/`
   - Método: `GET`
-  - Ruta: `/user/get-instructor-profile/<str:name_lastname>/`
-  - Descripción: Obtener el perfil de un instructor por nombre y apellido.
+  - Descripción: Obtener la información del usuario.
+  - Se debe enviar el `Token de Autenticación`.
 
-## Otros
+```bash
+  # Entrada -> Ninguna
 
-- **Agregar último curso visto**
-  - Método: `PUT`
-  - Ruta: `/user/add-last-watched-course/`
-  - Descripción: Agregar información sobre el último curso visto por el usuario.
-  - Se debe enviar el `Token de Autenticación` y el JSON debe ser en este estilo.
-
-  ```bash
-  {
-    # Nombre del curso que esta visualizando el usuario
-    "name": "Curso de Programación Avanzada 1",
-    "last_module_name": "2", # Nombre del ultimo modulo del curso visto
-    "last_subtopic_name": "2", # Nombre del ultimo subtema del curso visto
-    "last_subtopic_url": "/assets/" # URL del ultimo video visto
-  }
+  # Salida
+  Status: 200 -> Retorna información del usuario.
+  Status: 401 -> Acceso no autorizado.
+  Status: 404 -> Usuario no encontrado.
   ```
 
-- **Obtener último curso visto**
+- `http://127.0.0.1:8000/user/get-instructor-profile/<str: name_lastname>/`
   - Método: `GET`
-  - Ruta: `/user/get-last-watched-course/<str:course_name>/`
-  - Descripción: Obtener información sobre el último curso visto por el usuario.
-  - Se debe enviar el `Token de Autenticación` y se retorna un JSON con estos campos.
+  - Descripción: Obtener la información de un instructor en función de su nombre y apellido (Nombres-Apellidos)
 
-  ```bash
-  {
-    # Nombre del curso que esta visualizando el usuario
-    "name": "Curso de Programación Avanzada 1",
-    "last_module_name": "2", # Nombre del ultimo modulo del curso visto
-    "last_subtopic_name": "2", # Nombre del ultimo subtema del curso visto
-    "last_subtopic_url": "/assets/" # URL del ultimo video visto
-  }
+```bash
+  # Entrada -> Ninguna
+
+  # Salida
+  Status: 200 -> Retorna información del instructor.
+  Status: 404 -> Usuario no encontrado.
   ```
 
-- **Verificar si está inscrito en un curso**
+- `http://127.0.0.1:8000/user/featured-teachers/`
   - Método: `GET`
-  - Ruta: `/user/is-enrolled-in-course/<str:course_name>/`
-  - Descripción: Verificar si el usuario está inscrito en un curso específico.
-  - Se debe enviar el `Token de Autenticación`, y el `nombre del curso`.
-  - Retorna `True` si el usuario esta inscrito, caso contrario `Falso`.
+  - Descripción: Obtener los instructores destacados.
 
+```bash
+  # Entrada -> Ninguna
 
-# Documentación de API - Courses App
+  # Salida
+  Status: 200 -> Retorna la información de los instructores destacados.
+  Status: 404 -> No hay instructores destacados.
+  Status: 404 -> No hay instructores disponibles.
+  ```
 
-## Curso
+## Cursos
 
-- **Obtener, actualizar o eliminar un curso por ID**
-  - Método: `POST, GET`, `PUT`, `DELETE`
-  - Ruta: `/course/<int:id>/`
-  - Descripción: Obtener, actualizar o eliminar información de un curso específico.
-  - Ruta: POST -> `/course/`, aqui se debe averiguar como enviar videos o imagenes desde el frontend.
-  - Los campos que tiene `Course` son: `name, description, category, instructor, modules, comments, assessment, trailer_video_url, course_image_url`.
-  - El formato JSON debe ser:
+- `http://127.0.0.1:8000/course/`
+  - Método: `POST`
+  - Descripción: Crear un curso.
 
   ```bash
-  "name": "Curso de Programación Avanzada 4",
-  "description": "Aprende programación avanzada con este curso",
-  "category": "Fundamentos de programación",
-  "instructor": "Jhosel Alexander Guillin Fierro",
+  # Método POST
+  # Entrada
+  
+  "name": "",
+  "description": "",
+  "category": "",
+  "instructor": "",
   "modules": [
     {
-      "title": "Módulo 1",
-      "description": "Introducción a la programación avanzada",
+      "title": "",
+      "description": "",
       "content": [
         {
-          "title": "Clases y Objetos",
-          "video_url": "https://example.com/clases_y_objetos"
+          "title": "",
+          "video_url": ""
         },
-        {
-          "title": "Herencia",
-          "video_url": "https://example.com/herencia"
-        }
-      ]
-    },
-    {
-      "title": "Módulo 2",
-      "description": "Estructuras de datos avanzadas",
-      "content": [
-        {
-          "title": "Árboles binarios",
-          "video_url": "https://example.com/arboles_binarios"
-        },
-        {
-          "title": "Grafos",
-          "video_url": "https://example.com/grafos"
-        }
+        # Otros temas
       ]
     }
+  # Otros módulos
   ],
   "comments": [
     {
-      "student": "Maria Gómez",
-      "title": "Excelente curso",
-      "description": "Aprendí mucho, ¡gracias!",
-      "date": "2023-12-01"
-    },
-    {
-      "student": "Carlos Rodríguez",
-      "title": "Recomendado",
-      "description": "El curso es muy completo. Lo recomendaré a mis amigos.",
-      "date": "2023-12-02"
+      "student": "",
+      "title": "",
+      "description": "",
+      "date": ""
     }
+  # Otros comentarios
   ],
-  "assessment": 2.5,
-  "trailer_video_url": "/assets/coursesVideos/Facturacion_electronica_SRI.webm",
-  "course_image_url": "/assets/coursesPhotos/Captura_de_pantalla_2023-03-04_223731.png"
+  "trailer_video_url": "",
+  "course_image_url": ""
+
+  # Salida
+  Status: 200 -> Curso creado.
+  Status: 404 -> Error al guardar el curso.
   ```
 
-  - Para los campos `trailer_video_url` y `course_image_url` se debe enviar el video y la imagen respectivamente.
-  - Ruta: PUT -> `/course/`, se debe enviar en un JSON el `id` del curso y los campos que se desean actualizar, en el caso que se desee actualizar la foto del curso o el video trailer, se debe averiguar desde el frontend, como enviar.
+- `http://127.0.0.1:8000/course/<int:id>/`
+  - Método: `GET`, `DELETE`
+  - Descripción: Obtener un curso o todos y eliminar un curso dado su id.
 
-## Cursos por Categoría
+  ```bash
+  # Método GET
+  # Entrada -> Ninguna 
+  
+  # Salida
+  Status: 200 -> Obtiene la información de uno o varios cursos en función del id, si el id = 0, se obtiene todos los cursos.
+  Status: 404 -> Curso no encontrado.
+  ```
 
-- **Obtener cursos por categoría**
+  ```bash
+  # Método DELETE
+  # Entrada -> Ninguna 
+  
+  # Salida
+  Status: 200 -> Curso eliminado.
+  Status: 404 -> Curso no encontrado.
+  ```
+
+- `http://127.0.0.1:8000/course/<str:category>/`
   - Método: `GET`
-  - Ruta: `/course/<str:category>/`
-  - Descripción: Obtener una lista de cursos en una categoría específica.
+  - Descripción: Obtener los cursos en función de una categoría.
 
-## Cursos Destacados
+  ```bash
+  # Entrada -> Ninguna 
+  
+  # Salida
+  Status: 200 -> Devuelve los cursos correspondientes a la categoría.
+  Status: 404 -> No hay cursos disponibles.
+  ```
 
-- **Obtener cursos destacados**
+- `http://127.0.0.1:8000/course/featured-courses/`
   - Método: `GET`
-  - Ruta: `/course/featured-courses/`
-  - Descripción: Obtener una lista de cursos destacados basados en una calificación mayor o igual a 4.0.
+  - Descripción: Obtener los cursos destacados.
 
-## Cursos Recientemente Agregados
+  ```bash
+  # Entrada -> Ninguna 
+  
+  # Salida
+  Status: 200 -> Retorna los cursos destacados.
+  Status: 404 -> No hay cursos destacados.
+  Status: 404 -> No hay cursos disponibles.
+  ```
 
-- **Obtener cursos recientemente agregados**
+- `http://127.0.0.1:8000/course/recently-added-courses/`
   - Método: `GET`
-  - Ruta: `/course/recently-added-courses/`
-  - Descripción: Obtener una lista de los últimos 3 cursos agregados, ordenados por fecha de agregado.
+  - Descripción: Obtener los 5 cursos recientemente agregados.
 
-## Cursos por Instructor
+  ```bash
+  # Entrada -> Ninguna 
+  
+  # Salida
+  Status: 200 -> Retorna los cursos recientemente añadidos.
+  Status: 404 -> No hay cursos disponibles.
+  ```
 
-- **Obtener cursos por instructor**
+- `http://127.0.0.1:8000/course/courses-by-instructor/<str:instructor_name>/`
   - Método: `GET`
-  - Ruta: `/course/courses-by-instructor/<str:instructor_name>/`
-  - Descripción: Obtener una lista de cursos impartidos por un instructor específico.
-  - Se debe enviar el nombre del instructor en la ruta.
+  - Descripción: Obtener los cursos de un instructor.
 
+  ```bash
+  # Entrada -> Ninguna 
+  
+  # Salida
+  Status: 200 -> Retorna los cursos del instructor.
+  Status: 404 -> No hay cursos disponibles.
+  ```
 
-# Documentación de API - Categories App
+## Categorías
 
-## Categoría
+- `http://127.0.0.1:8000/category/`
+  - Método: `POST`, `PUT`
+  - Descripción: Crear y actualiza una categoría.
 
-- **Obtener todas las categorías o crear una nueva categoría**
-  - Método: `POST`, `GET`
-  - Ruta: `/category/`
-  - Descripción: Obtener todas las categorías disponibles o crear una nueva categoría.
+  ```bash
+  # Método POST
+  # Entrada
+  {
+   "name": "",
+   "description": ""
+  }
+  
+  # Salida
+  Status: 200 -> Categoria agregada.
+  Status: 404 -> Error al guardar la categoria, revisar los campos que se envían.
+  ```
 
-- **Obtener, actualizar o eliminar una categoría por ID**
-  - Método: `GET`, `PUT`, `DELETE`
-  - Ruta: `/category/<int:id>/`
-  - Descripción: Obtener, actualizar o eliminar información de una categoría específica.
+  ```bash
+  # Método PUT
+  # Entrada
+  {
+    "id": "",
+   "name": "",
+   "description": ""
+  }
+  
+  # Salida
+  Status: 200 -> Categoria actualizada.
+  Status: 404 -> Error al actualizar categoria.
+  ```
 
-- **Obtener el ID de la categoría por el nombre**
+- `http://127.0.0.1:8000/category/<int:id>/`
+  - Método: `GET`, `DELETE`
+  - Descripción: Obtiene y elimina una categoría.
+
+  ```bash
+  # Método GET
+  # Entrada -> Ninguna
+  
+  # Salida
+  Status: 200 -> Devuelve todas las categorías, si el id = 0, retorna todas las categorias, caso contrario retorna la categoria respectiva al id.
+  Status: 404 -> Categoría no encontrada.
+  ```
+
+  ```bash
+  # Método DELETE
+  # Entrada -> Ninguna
+  
+  # Salida
+  Status: 200 -> Categoria eliminada.
+  Status: 404 -> Categoria no encontrada.
+  ```
+
+- `http://127.0.0.1:8000/category/<str:category_name>/`
   - Método: `GET`
-  - Ruta: `/category/<str:category_name>/`
-  - Descripción: Obtener el ID de la categoría utilizando el nombre de la categoría.
+  - Descripción: Obtiene el id de la categoría.
 
+  ```bash
+  # Método POST
+  # Entrada -> Ninguna
+  
+  # Salida
+  Status: 200 -> Retorna el id de la categoría.
+  Status: 404 -> Categoría no encontrada.
+  ```
 
 **Nota:** Esta documentación está sujeta a cambios a medida que evoluciona la API.
