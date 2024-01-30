@@ -1,31 +1,188 @@
-# Documentación de API - Users App
+# PUNTOS DE ACCESO
 
 ## Usuario
 
-- **Obtener, actualizar, eliminar usuario**
-  - Método: `GET`, `PUT`, `DELETE`
-  - Ruta: `/user/`
+- `http://127.0.0.1:8000/user/`
+  - Métodos: `GET`, `PUT`, `DELETE`
   - Descripción: Obtener, actualizar o eliminar información del usuario.
   - Es necesario enviar el `Token de Autenticación` para cada una de estas peticiones.
-  - Ruta: PUT -> `/user/` -> Buscar desde el frontend como enviar archivos en la ruta y de ser necesario información extra que desee actualizar el usuario (name, lastname, etc), formato JSON.
 
-- **Registrar usuario (Sign Up)**
+  ```bash
+  # Método GET
+  # Entrada -> Ninguna
+
+  # Salida
+  Status: 200 -> Retorna los cursos a los cuales el usuario esta inscrito.
+  Status: 401 -> Acceso no autorizado, verificar token de sesión
+  ```
+
+  ```bash
+  # Método PUT - Inscribir en un curso
+  # Entrada
+  {
+  "enrolled_courses": [
+    {
+      "name": "",
+      "state": "enrolled"
+    }
+  ]
+  }
+  # Salida
+  Status: 200 -> Retorna los cursos a los cuales el usuario esta inscrito.
+  Status: 401 -> Acceso no autorizado, verificar token de sesión
+  ```
+
+  ```bash
+  # Método PUT - Actualizar el resto de información del usuario
+  # Entrada
+  {
+  "name": "",
+  "lastname": "",
+  "role": "",
+  "semester": "",
+  "approve_teacher": "",
+  "approve_teacher_email": "",
+  "user_description": "",
+  "profile_image_url": ""
+  }
+  # Salida
+  Status: 200 -> Usuario actualizado
+  Status: 400 -> Error al actualizar usuario, revisar información enviada dentro de cada campo
+  Status: 401 -> Acceso no autorizado, verificar token de sesión.
+  ```
+
+  ```bash
+  # Método DELETE
+  # Entrada -> Ninguna
+
+  # Salida
+  Status: 200 -> Usuario eliminado
+  Status: 400 -> Usuario no encontrado
+  ```
+
+- `http://127.0.0.1:8000/user/is-enrolled-in-course/<str: course_name>/`
+  - Método: `GET`
+  - Descripción: Verificar si un usuario esta inscrito en un curso.
+  - Es necesario enviar el `Token de Autenticación`.
+
+```bash
+  # Entrada -> Ninguna
+
+  # Salida
+  Status: 200 -> True, usuario inscrito en el curso
+  Status: 200 -> False, usuario no inscrito en el curso
+  ```
+
+- `http://127.0.0.1:8000/user/sign-up/`
   - Método: `POST`
-  - Ruta: `/user/sign-up/`
-  - Descripción: Registrar un nuevo usuario en la plataforma.
-  - Los datos se envian en formato JSON.
+  - Descripción: Permite el registro de usuarios.
 
-- **Iniciar sesión (Sign In)**
+```bash
+  # Entrada
+{
+  "email": "",
+  "name": "",
+  "lastname": "",
+  "password": "",
+  "role": "",
+  "semester": "",
+  "enrolled_courses": [
+  ]
+}
+
+  # Salida
+  Status: 200 -> Usuario registrado.
+  Status: 400 -> Correo electrónico inválido.
+  Status: 400 -> Error al guardar el usuario.
+  Status: 402 -> Usuario ya registrado en BD.
+  ```
+
+- `http://127.0.0.1:8000/user/sign-in/`
   - Método: `POST`
-  - Ruta: `/user/sign-in/`
-  - Descripción: Iniciar sesión en la plataforma.
-  - Se debe enviar el `email` y la `password` en formato JSON.
+  - Descripción: Iniciar sesión.
 
-- **Cerrar sesión (Sign Out)**
+```bash
+  # Entrada
+{
+  "email": "",
+  "password": ""
+}
+
+  # Salida
+  Status: 200 -> Retorna información del usuario.
+  Status: 400 -> Correo electrónico inválido.
+  Status: 400 -> Correo electrónico y contraseña no ingresados.
+  Status: 401 -> Contraseña incorrecta.
+  Status: 403 -> Correo electrónico no verificado.
+  Status: 404 -> Usuario no encontrado.
+  ```
+
+- `http://127.0.0.1:8000/user/sign-out/`
   - Método: `PUT`
-  - Ruta: `/user/sign-out/`
   - Descripción: Cerrar la sesión actual del usuario.
-  - Se debe enviar el `Token de Autenticación`
+  - Se debe enviar el `Token de Autenticación`.
+
+```bash
+  # Entrada -> Ninguna
+
+  # Salida
+  Status: 200 -> Sesión cerrada.
+  Status: 400 -> Error al cerrar sesión.
+  Status: 401 -> Acceso no autorizado
+  Status: 404 -> Usuario no encontrado.
+  ```
+
+- `http://127.0.0.1:8000/user/change-password/`
+  - Método: `PUT`
+  - Descripción: Cambiar contraseña.
+  - Se debe enviar el `Token de Autenticación`.
+
+```bash
+  # Entrada
+{
+  "password": ""
+}
+
+  # Salida
+  Status: 200 -> Contraseña actualizada.
+  Status: 400 -> Error al actualizar la contraseña.
+  Status: 401 -> Acceso no autorizado
+  Status: 404 -> Usuario no encontrado.
+  ```
+
+- `http://127.0.0.1:8000/user/send-email-to-restore-password/`
+  - Método: `PUT`
+  - Descripción: Enviar correo para restaurar contraseña.
+
+```bash
+  # Entrada
+{
+  "email": ""
+}
+
+  # Salida
+  Status: 200 -> Correo electrónico enviado.
+  Status: 400 -> Correo electrónico inválido.
+  Status: 404 -> Usuario no encontrado.
+  ```
+
+- `http://127.0.0.1:8000/user/restore-password/`
+  - Método: `PUT`
+  - Descripción: Restaurar contraseña.
+
+```bash
+  # Entrada
+{
+  "email": "",
+  "password": ""
+}
+
+  # Salida
+  Status: 200 -> Contraseña actualizada.
+  Status: 400 -> Correo electrónico inválido.
+  Status: 400 -> Error al actualizar la contraseña.
+  Status: 404 -> Usuario no encontrado.
+  ```
 
 - **Verificar correo electrónico del usuario**
   - Método: `POST`
