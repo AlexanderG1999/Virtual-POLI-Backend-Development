@@ -109,7 +109,7 @@
 }
 
   # Salida
-  Status: 200 -> Retorna información del usuario.
+  Status: 200 -> Inicio de sesión correcto.
   Status: 400 -> Correo electrónico inválido.
   Status: 400 -> Correo electrónico y contraseña no ingresados.
   Status: 401 -> Contraseña incorrecta.
