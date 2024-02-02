@@ -54,10 +54,17 @@ def user_api(request):
                         # Add the converted course to the list
                         enrolled_courses.append(enrolled_course_dict)
 
+                        # Remove some fields in enrolled_courses
+                        for index in range(len(enrolled_courses)):
+                            del enrolled_courses[index]['description']
+                            del enrolled_courses[index]['modules']
+                            del enrolled_courses[index]['comments']
+                            del enrolled_courses[index]['trailer_video_url']
+
                     except Course.DoesNotExist:
                         return JsonResponse("Error al retornar los cursos del usuario", safe=False, status=404)
 
-                return JsonResponse(enrolled_courses, safe=False)
+                return JsonResponse(enrolled_courses, safe=False, status=200)
 
             except User.DoesNotExist:
                 return JsonResponse("Error al retornar los cursos del usuario", safe=False, status=404)
@@ -523,6 +530,8 @@ def get_user_profile(request):
                 del user_data['session_token']
                 del user_data['password']
                 del user_data['email_verification']
+                del user_data['enrolled_courses']
+
                 return JsonResponse(user_data, safe=False, status=200)
 
             except User.DoesNotExist:
@@ -569,13 +578,13 @@ def featured_teachers(request):
                 teachers_data = teachers_serializer.data
 
                 for index in range(len(teachers_data)):
-                    del teachers_data[index]['email'] # Remove the field email
                     del teachers_data[index]['password'] # Remove the field password
                     del teachers_data[index]['approve_teacher_email'] # Remove the field approve_teacher_email
                     del teachers_data[index]['user_description'] # Remove the field user_description
                     del teachers_data[index]['enrolled_courses'] # Remove the field enrolled_courses
                     del teachers_data[index]['email_verification'] # Remove the field email_verification
                     del teachers_data[index]['session_token'] # Remove the field session_token
+                    del teachers_data[index]['role'] # Remove the field role
 
                 return JsonResponse(teachers_data, safe=False, status=200)
             else:
