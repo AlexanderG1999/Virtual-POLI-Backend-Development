@@ -74,7 +74,7 @@ def user_api(request):
 
                 if user_serializer.is_valid():
                     user_serializer.save()
-                    return JsonResponse("Nuevo curso inscrito agregado", safe=False)
+                    return JsonResponse("Cursos del usuario actualizados", safe=False)
 
             # Update the rest of the user information
             else:
@@ -264,7 +264,7 @@ def sign_in(request):
                             if user_serializer.is_valid():
                                 user_serializer.save()
 
-                            return JsonResponse("¡Bienvenido!", safe=False, status=200)
+                            return JsonResponse(user_serializer.data['session_token'], safe=False)
                         else:
                             return JsonResponse({"mensaje": "Contraseña incorrecta"}, status=401)
 
@@ -521,6 +521,8 @@ def get_user_profile(request):
                 # Remove the field session_token
                 user_data = user_serializer.data
                 del user_data['session_token']
+                del user_data['password']
+                del user_data['email_verification']
                 return JsonResponse(user_data, safe=False, status=200)
 
             except User.DoesNotExist:
@@ -563,7 +565,19 @@ def featured_teachers(request):
 
             if len(teachers) != 0:
                 teachers_serializer = UserSerializer(teachers, many=True)
-                return JsonResponse(teachers_serializer.data, safe=False, status=200)
+
+                teachers_data = teachers_serializer.data
+
+                for index in range(len(teachers_data)):
+                    del teachers_data[index]['email'] # Remove the field email
+                    del teachers_data[index]['password'] # Remove the field password
+                    del teachers_data[index]['approve_teacher_email'] # Remove the field approve_teacher_email
+                    del teachers_data[index]['user_description'] # Remove the field user_description
+                    del teachers_data[index]['enrolled_courses'] # Remove the field enrolled_courses
+                    del teachers_data[index]['email_verification'] # Remove the field email_verification
+                    del teachers_data[index]['session_token'] # Remove the field session_token
+
+                return JsonResponse(teachers_data, safe=False, status=200)
             else:
                 return JsonResponse("No hay instructores destacados", safe=False, status=404)
 

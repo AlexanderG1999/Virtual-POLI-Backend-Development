@@ -6,6 +6,9 @@ from rest_framework.decorators import api_view
 from Courses.models import Course
 from Courses.serializers import CourseSerializer
 
+from Content.models import Content
+from Content.serializers import ContentSerializer
+
 import boto3
 from decouple import config
 
@@ -14,7 +17,7 @@ import json
 # API views
 @csrf_exempt
 @api_view(['POST', 'GET', 'DELETE'])
-def course_api(request, id=0):
+def course_api(request, id="0"):
     #Create
     if request.method == 'POST':
 
@@ -35,14 +38,17 @@ def course_api(request, id=0):
     elif request.method == 'GET':
         course_id = id
 
-        if course_id != 0:
+        if course_id != "0":
             # Get the course by id
             try:
                 course = Course.objects.get(id=course_id)
                 course_serializer = CourseSerializer(course)
-                return JsonResponse(course_serializer.data, safe=False, status=200)
+
+                course_to_return = get_course_with_content(course_serializer.data)
+
+                return JsonResponse(course_to_return, safe=False, status=200)
             except Course.DoesNotExist:
-                return JsonResponse("Curso no encontrado", safe=False, status=404)
+                return JsonResponse("Curso no encontrado2", safe=False, status=404)
         else:
             # Get all courses
             course = Course.objects.all()
@@ -68,7 +74,14 @@ def courses_by_category(request, category):
         try:
             courses = Course.objects.filter(category=category)
             courses_serializer = CourseSerializer(courses, many=True)
-            return JsonResponse(courses_serializer.data, safe=False, status=200)
+
+            courses_to_return = []
+
+            for course in courses_serializer.data:
+                course_to_return = get_course_with_content(course)
+                courses_to_return.append(course_to_return)
+
+            return JsonResponse(courses_to_return, safe=False, status=200)
 
         except Course.DoesNotExist:
             return JsonResponse("No hay cursos disponibles", safe=False, status=404)
@@ -85,6 +98,12 @@ def featured_courses(request):
 
             if len(courses) != 0:
                 courses_serializer = CourseSerializer(courses, many=True)
+
+                courses_to_return = courses_serializer.data
+
+                '''for index in range(len(courses_serializer.data)):
+                    del courses_to_return[index]['id']'''
+
                 return JsonResponse(courses_serializer.data, safe=False, status=200)
             else:
                 return JsonResponse("No hay cursos destacados", safe=False, status=404)
@@ -106,7 +125,14 @@ def recently_added_courses(request):
             courses = courses[::-1]
 
             courses_serializer = CourseSerializer(courses, many=True)
-            return JsonResponse(courses_serializer.data, safe=False, status=200)
+
+            courses_to_return = []
+
+            for course in courses_serializer.data:
+                course_to_return = get_course_with_content(course)
+                courses_to_return.append(course_to_return)
+
+            return JsonResponse(courses_to_return, safe=False, status=200)
 
         except Course.DoesNotExist:
             return JsonResponse("No hay cursos disponibles", safe=False, status=404)
@@ -131,12 +157,6 @@ def courses_by_instructor(request, instructor_name):
 @api_view(['POST'])
 def upload_videos(request):
     if request.method == 'POST':
-        #course_serializer = CourseSerializer(data=request.data)
-
-        # Get the course
-        #course = Course.objects.get(id=course_id)
-        #course_serializer = CourseSerializer(course)
-
         # Get the modules of the course
         modules = json.loads(request.data['modules'])
 
@@ -144,8 +164,12 @@ def upload_videos(request):
             # Get the videos of the module
             topics = module['content']
 
-            for topic in topics:
-                topic['video_url'] = request.FILES['video'].name
+            # Get the list of videos from request.FILES['videos']
+            video_files = request.FILES.getlist('videos')
+
+            # Iterate over the videos and assign their names to topics
+            for i, video_file in enumerate(video_files):
+                topics[i]['video_url'] = video_file.name
 
         course_to_upload = {
             'name': request.data['name'],
@@ -183,3 +207,38 @@ def upload_content_videos_to_s3(course_id, video):
     # Save the video in Amazon S3
     s3_key = f'assets/{course_id}/{video.name}'
     s3.upload_fileobj(video, config('AWS_STORAGE_BUCKET_NAME'), s3_key)
+
+
+# Get the course with its content
+def get_course_with_content(course_serializer_data):
+    # Get the content of the course
+    content = Content.objects.filter(course_name=course_serializer_data['name'])
+    content_serializer = ContentSerializer(content, many=True)
+
+    # Remove (id, course_name) from the content
+    for i in range(len(content_serializer.data)):
+        content_serializer.data[i].pop('id')
+        content_serializer.data[i].pop('course_name')
+
+    # Add the content to the course
+    course_modules = list(course_serializer_data['modules'])
+
+    for course_index in range(len(course_serializer_data['modules'])):
+        for content_index in range(len(content_serializer.data)):
+            if course_modules[course_index]['title'] == content_serializer.data[content_index]['module']:
+                #content_serializer.data[content_index].pop('module')
+                course_modules[course_index]['content'].append(content_serializer.data[content_index])
+
+    course_to_return = {
+        'name': course_serializer_data['name'],
+        'description': course_serializer_data['description'],
+        'category': course_serializer_data['category'],
+        'instructor': course_serializer_data['instructor'],
+        'modules': course_modules,
+        'comments': course_serializer_data['comments'],
+        'assessment': course_serializer_data['assessment'],
+        'trailer_video_url': course_serializer_data['trailer_video_url'],
+        'course_image_url': course_serializer_data['course_image_url']
+    }
+
+    return course_to_return
