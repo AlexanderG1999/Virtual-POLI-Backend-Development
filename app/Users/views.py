@@ -21,6 +21,11 @@ from Courses.serializers import CourseSerializer
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 
+# AWS S3
+import boto3
+
+import re
+
 
 # API views (Update and delete user - Get/update enrolled courses)
 @csrf_exempt
@@ -88,7 +93,15 @@ def user_api(request):
                 user_serializer = UserSerializer(user, data=request.data, partial=True)
 
                 if user_serializer.is_valid():
+
+                    if(request.FILES.get('profile_image_url')):
+                        profile_image = request.FILES.get('profile_image_url')
+                        current_time = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+                        profile_image.name = f'profile_image_{user.email}_{current_time}'
+                        user_serializer.profile_image_url = profile_image
+
                     user_serializer.save()
+
                     return JsonResponse("Usuario actualizado", safe=False, status=200)
 
             return JsonResponse("Error al actualizar usuario", safe=False, status=400)
@@ -126,7 +139,7 @@ def add_last_watched_course(request):
                 for enrolled_course in user_serializer.data["enrolled_courses"]:
                     if enrolled_course["name"] == data["name"]:
                         # Update the last_module_name and last_subtopic_name
-                        #enrolled_course["state"] = data["state"]
+                        enrolled_course["state"] = data["state"]
                         enrolled_course["last_module_name"] = data["last_module_name"]
                         enrolled_course["last_subtopic_name"] = data["last_subtopic_name"]
 
@@ -254,7 +267,7 @@ def sign_in(request):
             if email !="" and password != "":
                 try:
                     user = User.objects.get(email=email) # Get the user of the BD
-                    email_verification = user.email_verification
+                    email_verification = user.email_verification # Get the email verification of the user
 
                     if email_verification:
                         password_user = user.password
@@ -594,6 +607,41 @@ def featured_teachers(request):
             return JsonResponse("No hay instructores disponibles", safe=False, status=404)
 
 
+# Get the instructors by key word
+@csrf_exempt
+@api_view(['GET'])
+def get_instructors(request, key_word):
+    if request.method == 'GET':
+        try:
+            # Search if the key_word is in instructors
+            instructors = User.objects.filter(role='instructor')
+            instructors_serializer = UserSerializer(instructors, many=True)
+
+            instructors_data = instructors_serializer.data
+
+            instructors_to_return = []
+
+            for index in range(len(instructors_data)):
+                if key_word.lower() in instructors_data[index]['name'].lower() or key_word.lower() in instructors_data[index]['lastname'].lower():
+                    del instructors_data[index]['password'] # Remove the field password
+                    del instructors_data[index]['approve_teacher_email'] # Remove the field approve_teacher_email
+                    del instructors_data[index]['user_description'] # Remove the field user_description
+                    del instructors_data[index]['enrolled_courses'] # Remove the field enrolled_courses
+                    del instructors_data[index]['email_verification'] # Remove the field email_verification
+                    del instructors_data[index]['session_token'] # Remove the field session_token
+                    del instructors_data[index]['role'] # Remove the field role
+
+                    instructors_to_return.append(instructors_data[index])
+
+            if len(instructors_to_return) == 0:
+                return JsonResponse("No hay instructores disponibles", safe=False, status=404)
+            else:
+                return JsonResponse(instructors_to_return, safe=False, status=200)
+
+        except User.DoesNotExist:
+            return JsonResponse("No hay instructores disponibles", safe=False, status=404)
+
+
 # Send an email
 def send_email(email, subject, message):
     email = EmailMessage(
@@ -648,3 +696,56 @@ def is_valid_email(email):
         return True
     except ValidationError:
         return False
+
+
+# Eliminate objects in bucket S3
+def delete_object_in_s3(object_url):
+    try:
+        s3 = boto3.client('s3', aws_access_key_id=config('AWS_ACCESS_KEY_ID'), aws_secret_access_key=config('AWS_SECRET_ACCESS_KEY'))
+        s3.delete_object(Bucket=config('AWS_STORAGE_BUCKET_NAME'), Key=object_url)
+    except Exception as e:
+        print('Error al eliminar el objeto en S3')
+
+
+# Delete special characters in a string
+def clean_string(text):
+    # Remove special characters and replace spaces with underscores
+    clean_text = re.sub(r'[^a-zA-Z0-9\s\._-]', '', text)
+    clean_text = re.sub(r'\s+', '_', clean_text)
+    return clean_text
+
+
+# Update instructor assessment
+def update_instructor_assessment(instructor_name):
+    try:
+        # Get all the instructors
+        instructors = User.objects.filter(role='instructor')
+        instructors_serializer = UserSerializer(instructors, many=True)
+
+        # Get the instructor
+        instructor_to_update = None
+        for index in range(len(instructors_serializer.data)):
+            instructor_full_name = instructors_serializer.data[index]["name"] + " " + instructors_serializer.data[index]["lastname"]
+            if instructor_full_name == instructor_name:
+                instructor_to_update = instructors[index]
+
+        # Get the courses of the instructor
+        instructor_courses = Course.objects.filter(instructor=instructor_name)
+        instructor_courses_serializer = CourseSerializer(instructor_courses, many=True)
+
+        instructor_assessment = 0
+        for course in instructor_courses_serializer.data:
+            instructor_assessment += course["assessment"]
+
+        instructor_assessment = instructor_assessment / len(instructor_courses_serializer.data)
+
+        # Update the assessment of the instructor
+        instructor_serializer = UserSerializer(instructor_to_update, data={'score_teacher': instructor_assessment}, partial=True)
+
+        if instructor_serializer.is_valid():
+            instructor_serializer.save()
+
+            print('Calificación del instructor actualizada')
+
+    except User.DoesNotExist:
+        print('Instructor no encontrado')

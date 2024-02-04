@@ -12,7 +12,9 @@ from Content.serializers import ContentSerializer
 import boto3
 from decouple import config
 
-import json
+from Users import views
+from Users.models import User
+from Users.serializers import UserSerializer
 
 # API views
 @csrf_exempt
@@ -26,11 +28,23 @@ def course_api(request, id="0"):
         if course_serializer.is_valid():
             course = course_serializer.save()
 
-            # Modify trailer_video_url name with course ID before saving
+            # Modify trailer_video_url and course_image_url name with course ID before saving
             trailer_video = request.FILES.get('trailer_video_url')
-            if trailer_video:
+            course_image = request.FILES.get('course_image_url')
+
+            trailer_video_url = config('URL_VIDEO_COURSE_STORAGE') + views.clean_string(trailer_video.name)
+            course_image_url = config('URL_IMAGE_COURSE_STORAGE') + views.clean_string(course_image.name)
+
+            views.delete_object_in_s3(trailer_video_url) # Delete the object in S3
+            views.delete_object_in_s3(course_image_url) # Delete the object in S3
+
+            if trailer_video and course_image:
                 trailer_video.name = f"trailer_video_{course.id}"
+                course_image.name = f"course_image_{course.id}"
+
                 course.trailer_video_url = trailer_video
+                course.course_image_url = course_image
+
                 course.save()
 
             response_data = {'mensaje': f'Curso agregado'}
@@ -123,6 +137,36 @@ def featured_courses(request):
             return JsonResponse("No hay cursos disponibles", safe=False, status=404)
 
 
+# Get the courses by key word
+@csrf_exempt
+@api_view(['GET'])
+def get_courses(request, key_word):
+    if request.method == 'GET':
+        try:
+            courses = Course.objects.all()
+            courses_serializer = CourseSerializer(courses, many=True)
+
+            courses_to_return = []
+
+            # Remove some fields from the courses_to_return
+            for index in range(len(courses_serializer.data)):
+                if key_word.lower() in courses_serializer.data[index]['name'].lower() or key_word.lower() in courses_serializer.data[index]['instructor'].lower():
+                    del courses_serializer.data[index]['description']
+                    del courses_serializer.data[index]['modules']
+                    del courses_serializer.data[index]['comments']
+                    del courses_serializer.data[index]['trailer_video_url']
+
+                    courses_to_return.append(courses_serializer.data[index])
+
+            if len(courses_to_return) == 0:
+                return JsonResponse("No hay cursos disponibles", safe=False, status=404)
+            else:
+                return JsonResponse(courses_to_return, safe=False, status=200)
+
+        except Course.DoesNotExist:
+            return JsonResponse("No hay cursos disponibles", safe=False, status=404)
+
+
 # Get recently added courses
 @csrf_exempt
 @api_view(['GET'])
@@ -176,47 +220,68 @@ def courses_by_instructor(request, instructor_name):
             return JsonResponse("No hay cursos disponibles", safe=False, status=404)
 
 
+# Update course comments and course assessment
 @csrf_exempt
-@api_view(['POST'])
-def upload_videos(request):
-    if request.method == 'POST':
-        # Get the modules of the course
-        modules = json.loads(request.data['modules'])
+@api_view(['PUT'])
+def update_course_comments(request, id):
+    user_token = views.verify_token(request) # return the email of the user if the token is valid
 
-        for module in modules:
-            # Get the videos of the module
-            topics = module['content']
+    if user_token is False:
+        return JsonResponse("Acceso no autorizado", safe=False, status=401)
 
-            # Get the list of videos from request.FILES['videos']
-            video_files = request.FILES.getlist('videos')
+    else:
+        if request.method == 'PUT':
+            try:
+                # Get the comments from the request
+                course_comments = request.data['comments']
 
-            # Iterate over the videos and assign their names to topics
-            for i, video_file in enumerate(video_files):
-                topics[i]['video_url'] = video_file.name
+                # Get the course and update the comments
+                course = Course.objects.get(id=id)
+                course_serializer = CourseSerializer(course, data={'comments': course.comments + course_comments}, partial=True)
 
-        course_to_upload = {
-            'name': request.data['name'],
-            'description': request.data['description'],
-            'category': request.data['category'],
-            'instructor': request.data['instructor'],
-            'modules': modules,
-            'comments': request.data['comments'],
-            'assessment': request.data['assessment'],
-            'trailer_video_url': request.FILES['trailer_video_url'],
-            'course_image_url': request.FILES['course_image_url']
-        }
+                if course_serializer.is_valid():
+                    course_serializer.save()
 
-        course_serializer = CourseSerializer(data=course_to_upload)
+                    # Update the course assessment
+                    update_course_assessment(id)
+
+                    # Update the instructor assessment
+                    views.update_instructor_assessment(course.instructor)
+
+                    return JsonResponse("Comentarios agregados", safe=False, status=200)
+                else:
+                    return JsonResponse("Error al agregar comentarios", safe=False, status=400)
+
+            except Course.DoesNotExist:
+                return JsonResponse("Curso no encontrado", safe=False, status=404)
+
+
+# Update course assessment when a comment is added
+def update_course_assessment(course_id):
+    try:
+        # Get the course and update the assessment
+        course = Course.objects.get(id=course_id)
+        course_serializer = CourseSerializer(course)
+
+        number_comments = len(course_serializer.data['comments'])
+
+        assessment = 0
+        for comment in course_serializer.data['comments']:
+            assessment += comment['assessment']
+
+        assessment = round(assessment / number_comments, 2)
+
+        course_serializer = CourseSerializer(course, data={'assessment': assessment}, partial=True)
 
         if course_serializer.is_valid():
             course_serializer.save()
-            response_data = {'mensaje': f'Curso agregado'}
-            status = 200
-        else:
-            response_data = {'mensaje': f'Error al guardar el curso'}
-            status = 400
 
-        return JsonResponse(response_data, safe=False, status=status)
+            print('Calificación del curso actualizada')
+        else:
+            print('Error al actualizar la calificación del curso')
+
+    except Course.DoesNotExist:
+        print('Curso no encontrado')
 
 
 # Upload content videos in bucket S3 AWS
@@ -249,10 +314,10 @@ def get_course_with_content(course_serializer_data):
     for course_index in range(len(course_serializer_data['modules'])):
         for content_index in range(len(content_serializer.data)):
             if course_modules[course_index]['title'] == content_serializer.data[content_index]['module']:
-                #content_serializer.data[content_index].pop('module')
                 course_modules[course_index]['content'].append(content_serializer.data[content_index])
 
     course_to_return = {
+        'id': course_serializer_data['id'],
         'name': course_serializer_data['name'],
         'description': course_serializer_data['description'],
         'category': course_serializer_data['category'],
@@ -265,3 +330,12 @@ def get_course_with_content(course_serializer_data):
     }
 
     return course_to_return
+
+
+# Eliminate objects in bucket S3
+def delete_object_in_s3(object_url):
+    try:
+        s3 = boto3.client('s3', aws_access_key_id=config('AWS_ACCESS_KEY_ID'), aws_secret_access_key=config('AWS_SECRET_ACCESS_KEY'))
+        s3.delete_object(Bucket=config('AWS_STORAGE_BUCKET_NAME'), Key=object_url)
+    except Exception as e:
+        print('Error al eliminar el objeto en S3')
