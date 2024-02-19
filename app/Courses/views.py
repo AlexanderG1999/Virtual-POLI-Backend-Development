@@ -69,7 +69,7 @@ def course_api(request, id="0"):
 
                 return JsonResponse(course_to_return, safe=False, status=200)
             except Course.DoesNotExist:
-                return JsonResponse("Curso no encontrado2", safe=False, status=404)
+                return JsonResponse({'mensaje': f'Curso no encontrado'}, safe=False, status=404)
         else:
             # Get all courses
             course = Course.objects.all()
@@ -81,10 +81,10 @@ def course_api(request, id="0"):
         try:
             course = Course.objects.get(id=id)
             course.delete()
-            return JsonResponse("Curso eliminado", safe=False, status=200)
+            return JsonResponse({'mensaje': f'Curso eliminado'}, safe=False, status=200)
 
         except Course.DoesNotExist:
-            return JsonResponse("Curso no encontrado", safe=False, status=404)
+            return JsonResponse({'mensaje': f'Curso no encontrado'}, safe=False, status=404)
 
 
 # Get the courses by the category
@@ -105,7 +105,7 @@ def courses_by_category(request, category):
             return JsonResponse(courses_to_return, safe=False, status=200)
 
         except Course.DoesNotExist:
-            return JsonResponse("No hay cursos disponibles", safe=False, status=404)
+            return JsonResponse({'mensaje': f'No hay cursos disponibles'}, safe=False, status=404)
 
 
 # Get featured courses
@@ -131,10 +131,10 @@ def featured_courses(request):
 
                 return JsonResponse(courses_serializer.data, safe=False, status=200)
             else:
-                return JsonResponse("No hay cursos destacados", safe=False, status=404)
+                return JsonResponse({'mensaje': f'No hay cursos destacados'}, safe=False, status=404)
 
         except Course.DoesNotExist:
-            return JsonResponse("No hay cursos disponibles", safe=False, status=404)
+            return JsonResponse({'mensaje': f'No hay cursos disponibles'}, safe=False, status=404)
 
 
 # Get the courses by key word
@@ -159,12 +159,12 @@ def get_courses(request, key_word):
                     courses_to_return.append(courses_serializer.data[index])
 
             if len(courses_to_return) == 0:
-                return JsonResponse("No hay cursos disponibles", safe=False, status=404)
+                return JsonResponse({'mensaje': f'No hay cursos disponibles'}, safe=False, status=404)
             else:
                 return JsonResponse(courses_to_return, safe=False, status=200)
 
         except Course.DoesNotExist:
-            return JsonResponse("No hay cursos disponibles", safe=False, status=404)
+            return JsonResponse({'mensaje': f'No hay cursos disponibles'}, safe=False, status=404)
 
 
 # Get recently added courses
@@ -193,7 +193,7 @@ def recently_added_courses(request):
             return JsonResponse(courses_to_return, safe=False, status=200)
 
         except Course.DoesNotExist:
-            return JsonResponse("No hay cursos disponibles", safe=False, status=404)
+            return JsonResponse({'mensaje': f'No hay cursos disponibles'}, safe=False, status=404)
 
 
 # Get the courses by the instructor
@@ -217,7 +217,7 @@ def courses_by_instructor(request, instructor_name):
             return JsonResponse(courses_to_return, safe=False, status=200)
 
         except Course.DoesNotExist:
-            return JsonResponse("No hay cursos disponibles", safe=False, status=404)
+            return JsonResponse({'mensaje': f'No hay cursos disponibles'}, safe=False, status=404)
 
 
 # Update course comments and course assessment
@@ -227,7 +227,7 @@ def update_course_comments(request, id):
     user_token = views.verify_token(request) # return the email of the user if the token is valid
 
     if user_token is False:
-        return JsonResponse("Acceso no autorizado", safe=False, status=401)
+        return JsonResponse({'mensaje': f'Acceso no autorizado'}, safe=False, status=401)
 
     else:
         if request.method == 'PUT':
@@ -248,12 +248,12 @@ def update_course_comments(request, id):
                     # Update the instructor assessment
                     views.update_instructor_assessment(course.instructor)
 
-                    return JsonResponse("Comentarios agregados", safe=False, status=200)
+                    return JsonResponse({'mensaje': f'Comentarios agregados'}, safe=False, status=200)
                 else:
-                    return JsonResponse("Error al agregar comentarios", safe=False, status=400)
+                    return JsonResponse({'mensaje': f'Error al agregar comentarios'}, safe=False, status=400)
 
             except Course.DoesNotExist:
-                return JsonResponse("Curso no encontrado", safe=False, status=404)
+                return JsonResponse({'mensaje': f'Curso no encontrado'}, safe=False, status=404)
 
 
 # Update course assessment when a comment is added

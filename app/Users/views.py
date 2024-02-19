@@ -34,7 +34,7 @@ def user_api(request):
     user_token = verify_token(request) # return the email of the user if the token is valid
 
     if user_token is False:
-        return JsonResponse("Acceso no autorizado", safe=False, status=401)
+        return JsonResponse({'mensaje': f'Acceso no autorizado'}, safe=False, status=401)
 
     else:
         # Get the enrolled courses of the user
@@ -67,12 +67,12 @@ def user_api(request):
                             del enrolled_courses[index]['trailer_video_url']
 
                     except Course.DoesNotExist:
-                        return JsonResponse("Error al retornar los cursos del usuario", safe=False, status=404)
+                        return JsonResponse({'mensaje': f'Error al retornar los cursos del usuario'}, safe=False, status=404)
 
                 return JsonResponse(enrolled_courses, safe=False, status=200)
 
             except User.DoesNotExist:
-                return JsonResponse("Error al retornar los cursos del usuario", safe=False, status=404)
+                return JsonResponse({'mensaje': f'Usuario no encontrado'}, safe=False, status=404)
 
 
         # Update user
@@ -86,7 +86,7 @@ def user_api(request):
 
                 if user_serializer.is_valid():
                     user_serializer.save()
-                    return JsonResponse("Cursos del usuario actualizados", safe=False)
+                    return JsonResponse({'mensaje': f'Cursos del usuario actualizados'}, safe=False)
 
             # Update the rest of the user information
             else:
@@ -102,9 +102,9 @@ def user_api(request):
 
                     user_serializer.save()
 
-                    return JsonResponse("Usuario actualizado", safe=False, status=200)
+                    return JsonResponse({'mensaje': f'Usuario actualizado'}, safe=False, status=200)
 
-            return JsonResponse("Error al actualizar usuario", safe=False, status=400)
+            return JsonResponse({'mensaje': f'Error al actualizar usuario'}, safe=False, status=400)
 
 
         # Delete user
@@ -112,10 +112,10 @@ def user_api(request):
             try:
                 user = User.objects.get(email=user_token)
                 user.delete()
-                return JsonResponse("Usuario eliminado", safe=False, status=200)
+                return JsonResponse({'mensaje': f'Usuario eliminado'}, safe=False, status=200)
 
             except User.DoesNotExist:
-                return JsonResponse("Usuario no encontrado", safe=False, status=404)
+                return JsonResponse({'mensaje': f'Usuario no encontrado'}, safe=False, status=404)
 
 
 # Add field last_module_name and last_subtopic_name in field enrolled_courses
@@ -126,7 +126,7 @@ def add_last_watched_course(request):
         user_token = verify_token(request) # return the email of the user if the token is valid
 
         if user_token is False:
-            return JsonResponse("Acceso no autorizado", safe=False, status=401)
+            return JsonResponse({'mensaje': f'Acceso no autorizado'}, safe=False, status=401)
 
         else:
             data = JSONParser().parse(request)
@@ -148,10 +148,10 @@ def add_last_watched_course(request):
 
                 if user_serializer.is_valid():
                     user_serializer.save()
-                    return JsonResponse("Ultimo curso visto agregado", safe=False, status=200)
+                    return JsonResponse({'mensaje': f'Ultimo curso visto agregado'}, safe=False, status=200)
 
             except User.DoesNotExist:
-                return JsonResponse("Usuario no encontrado", safe=False, status=404)
+                return JsonResponse({'mensaje': f'Usuario no encontrado'}, safe=False, status=404)
 
 
 # Get the last watched course
@@ -162,7 +162,7 @@ def get_last_watched_course(request, course_name):
         user_token = verify_token(request) # return the email of the user if the token is valid
 
         if user_token is False:
-            return JsonResponse("Acceso no autorizado", safe=False, status=401)
+            return JsonResponse({'mensaje': f'Acceso no autorizado'}, safe=False, status=401)
 
         else:
             try:
@@ -177,7 +177,7 @@ def get_last_watched_course(request, course_name):
                         return JsonResponse(enrolled_course, safe=False, status=200)
 
             except User.DoesNotExist:
-                return JsonResponse("Usuario no encontrado", safe=False, status=404)
+                return JsonResponse({'mensaje': f'Usuario no encontrado'}, safe=False, status=404)
 
 
 # Verify if the user is enrolled in a course
@@ -188,7 +188,7 @@ def is_enrolled_in_course(request, course_name):
         user_token = verify_token(request)
 
         if user_token is False:
-            return JsonResponse("Acceso no autorizado", safe=False, status=401)
+            return JsonResponse({'mensaje': f'Acceso no autorizado'}, safe=False, status=401)
 
         else:
             try:
@@ -198,12 +198,12 @@ def is_enrolled_in_course(request, course_name):
                 # Get the specific enrolled course
                 for enrolled_course in user_serializer.data["enrolled_courses"]:
                     if enrolled_course["name"] == course_name:
-                        return JsonResponse(True, safe=False, status=200) # The user is enrolled in the course
+                        return JsonResponse({'respuesta': True}, safe=False, status=200) # The user is enrolled in the course
 
-                return JsonResponse(False, safe=False, status=200) # The user is not enrolled in the course
+                return JsonResponse({'respuesta': False}, safe=False, status=200) # The user is not enrolled in the course
 
             except User.DoesNotExist:
-                return JsonResponse("Usuario no encontrado", safe=False, status=404)
+                return JsonResponse({'mensaje': f'Usuario no encontrado'}, safe=False, status=404)
 
 
 # Sign up
@@ -215,7 +215,7 @@ def sign_up(request):
 
         # Verify if the email is valid
         if is_valid_email(data.get("email")) is False:
-            return JsonResponse("Correo electrónico inválido", safe=False, status=400)
+            return JsonResponse({'mensaje': f'Correo electrónico inválido'}, safe=False, status=400)
         else:
             # Check if the user is registered
             existing_user = User.objects.filter(email=data.get("email")).first()
@@ -257,7 +257,7 @@ def sign_in(request):
 
         # Verify if the email is valid
         if is_valid_email(data.get("email")) is False:
-            return JsonResponse("Correo electrónico inválido", safe=False, status=400)
+            return JsonResponse({'mensaje': f'Correo electrónico inválido'}, safe=False, status=400)
         else:
             # Get the email and password from the request
             email = data.get("email")
@@ -284,7 +284,7 @@ def sign_in(request):
                             if user_serializer.is_valid():
                                 user_serializer.save()
 
-                            return JsonResponse(user_serializer.data['session_token'], safe=False)
+                            return JsonResponse({'token': user_serializer.data['session_token']}, safe=False)
                         else:
                             return JsonResponse({"mensaje": "Contraseña incorrecta"}, status=401)
 
@@ -306,7 +306,7 @@ def sign_out(request):
         user_token = verify_token(request) # return the email of the user if the token is valid
 
         if user_token is False:
-            return JsonResponse("Acceso no autorizado", safe=False, status=401)
+            return JsonResponse({'mensaje': f'Acceso no autorizado'}, safe=False, status=401)
 
         else:
             try:
@@ -315,12 +315,12 @@ def sign_out(request):
 
                 if user_serializer.is_valid():
                     user_serializer.save()
-                    return JsonResponse("Sesión cerrada", safe=False, status=200)
+                    return JsonResponse({'mensaje': f'Sesión cerrada'}, safe=False, status=200)
                 else:
-                    return JsonResponse("Error al cerrar sesión", safe=False, status=400)
+                    return JsonResponse({'mensaje': f'Error al cerrar sesión'}, safe=False, status=400)
 
             except User.DoesNotExist:
-                return JsonResponse("Usuario no encontrado", safe=False, status=404)
+                return JsonResponse({'mensaje': f'Usuario no encontrado'}, safe=False, status=404)
 
 
 # Update password
@@ -330,7 +330,7 @@ def change_password(request):
     if request.method == 'PUT':
         user_token = verify_token(request)
         if user_token is False:
-            return JsonResponse("Acceso no autorizado", safe=False, status=401)
+            return JsonResponse({'mensaje': f'Acceso no autorizado'}, safe=False, status=401)
 
         else:
             try:
@@ -344,12 +344,12 @@ def change_password(request):
 
                 if user_serializer.is_valid():
                     user_serializer.save()
-                    return JsonResponse("Contraseña actualizada", safe=False, status=200)
+                    return JsonResponse({'mensaje': f'Contraseña actualizada'}, safe=False, status=200)
                 else:
-                    return JsonResponse("Error al actualizar la contraseña", safe=False, status=400)
+                    return JsonResponse({'mensaje': f'Error al actualizar la contraseña'}, safe=False, status=400)
 
             except User.DoesNotExist:
-                return JsonResponse("Usuario no encontrado", safe=False, status=404)
+                return JsonResponse({'mensaje': f'Usuario no encontrado'}, safe=False, status=404)
 
 
 # Send an email to restore password
@@ -361,7 +361,7 @@ def send_email_to_restore_password(request):
 
         # Verify if the email is valid
         if is_valid_email(data.get("email")) is False:
-            return JsonResponse("Correo electrónico inválido", safe=False, status=400)
+            return JsonResponse({'mensaje': f'Correo electrónico inválido'}, safe=False, status=400)
         else:
             email = data.get("email")
 
@@ -374,10 +374,10 @@ def send_email_to_restore_password(request):
                 message = f"Hola {user.name} {user.lastname},\n\nPor favor, restablece tu contraseña haciendo click en el siguiente enlace:\n\n{config('URL_FRONTEND')}/restore-account/\n\nGracias,\n\nEl equipo de Virtual Poli."
                 send_email(user.email, subject, message)
 
-                return JsonResponse("Correo electrónico enviado", safe=False, status=200)
+                return JsonResponse({'mensaje': f'Correo electrónico enviado'}, safe=False, status=200)
 
             except User.DoesNotExist:
-                return JsonResponse("Usuario no encontrado", safe=False, status=404)
+                return JsonResponse({'mensaje': f'Usuario no encontrado'}, safe=False, status=404)
 
 
 # Restore password
@@ -389,7 +389,7 @@ def restore_password(request):
 
         # Verify if the email is valid
         if is_valid_email(data.get("email")) is False:
-            return JsonResponse("Correo electrónico inválido", safe=False, status=400)
+            return JsonResponse({'mensaje': f'Correo electrónico inválido'}, safe=False, status=400)
         else:
             email = data.get("email")
 
@@ -404,12 +404,12 @@ def restore_password(request):
 
                 if user_serializer.is_valid():
                     user_serializer.save()
-                    return JsonResponse("Contraseña actualizada", safe=False, status=200)
+                    return JsonResponse({'mensaje': f'Contraseña actualizada'}, safe=False, status=200)
                 else:
-                    return JsonResponse("Error al actualizar la contraseña", safe=False, status=400)
+                    return JsonResponse({'mensaje': f'Error al actualizar la contraseña'}, safe=False, status=400)
 
             except User.DoesNotExist:
-                return JsonResponse("Usuario no encontrado", safe=False, status=404)
+                return JsonResponse({'mensaje': f'Usuario no encontrado'}, safe=False, status=404)
 
 
 # Set email verification
@@ -421,7 +421,7 @@ def set_email_verification(request):
 
         # Verify if the email is valid
         if is_valid_email(data.get("email")) is False:
-            return JsonResponse("Correo electrónico inválido", safe=False, status=400)
+            return JsonResponse({'mensaje': f'Correo electrónico inválido'}, safe=False, status=400)
         else:
             email = data.get("email")
 
@@ -431,10 +431,10 @@ def set_email_verification(request):
 
                 if user_serializer.is_valid():
                     user_serializer.save()
-                    return JsonResponse("Correo electrónico verificado", safe=False, status=200)
+                    return JsonResponse({'mensaje': f'Correo electrónico verificado'}, safe=False, status=200)
 
             except User.DoesNotExist:
-                return JsonResponse("Usuario no encontrado", safe=False, status=404)
+                return JsonResponse({'mensaje': f'Usuario no encontrado'}, safe=False, status=404)
 
 
 # Contact with us
@@ -446,14 +446,14 @@ def contact_with_us(request):
 
         # Verify if the email is valid
         if is_valid_email(data.get("email")) is False:
-            return JsonResponse("Correo electrónico inválido", safe=False, status=400)
+            return JsonResponse({'mensaje': f'Correo electrónico inválido'}, safe=False, status=400)
         else:
             # Send email to contact with us
             subject = "Contactar con equipo de Poli Virtual"
             message = f"Nombre: {data.get('name')}\n\nCorreo electrónico: {data.get('email')}\n\nMensaje: {data.get('message')}"
             send_email(config('EMAIL_HOST_USER'), subject, message)
 
-            return JsonResponse("Correo electrónico enviado", safe=False, status=200)
+            return JsonResponse({'mensaje': f'Correo electrónico enviado'}, safe=False, status=200)
 
 
 # Send an email to the approve teacher to verify if he/she permits the user to be a teacher
@@ -464,14 +464,14 @@ def send_email_to_approve_teacher(request):
     if request.method == 'PUT':
         user_token = verify_token(request)
         if user_token is False:
-            return JsonResponse("Acceso no autorizado", safe=False, status=401)
+            return JsonResponse({'mensaje': f'Acceso no autorizado'}, safe=False, status=401)
 
         else:
             data = JSONParser().parse(request)
 
             # Verify if the email is valid
             if is_valid_email(data.get("approve_teacher_email")) is False:
-                return JsonResponse("Correo electrónico del profesor inválido", safe=False, status=400)
+                return JsonResponse({'mensaje': f'Correo electrónico del profesor inválido'}, safe=False, status=400)
             else:
                 approve_teacher_name = data.get("approve_teacher")
                 approve_teacher_email = data.get("approve_teacher_email")
@@ -489,10 +489,10 @@ def send_email_to_approve_teacher(request):
                         message = f"Saludos cordiales {approve_teacher_name},\n\nNos comunicamos con usted para completar el proceso de SER UN INSTRUCTOR en la plataforma Poli Virtual, del estudiante:\n\nEstudiante: {user.name} {user.lastname}\n\nCorreo institucional: {user.email}\n\nPor favor, autoriza que el estudiante pueda ser un Instructor, en el caso de si hacerlo, haga clic en el siguiente enlace:\n\n{config('URL_FRONTEND')}/approve-to-be-teacher/\n\nCaso contrario, ignore este correo.\n\nGracias,\n\nEl equipo de Poli Virtual."
                         send_email(approve_teacher_email, subject, message)
 
-                        return JsonResponse("Correo electrónico enviado", safe=False, status=200)
+                        return JsonResponse({'mensaje': f'Correo electrónico enviado'}, safe=False, status=200)
 
                 except User.DoesNotExist:
-                    return JsonResponse("Usuario no encontrado", safe=False, status=404)
+                    return JsonResponse({'mensaje': f'Usuario no encontrado'}, safe=False, status=404)
 
 
 # Be an instructor
@@ -504,7 +504,7 @@ def be_an_instructor(request):
 
         # Verify if the email is valid
         if is_valid_email(data.get("email")) is False:
-            return JsonResponse("Correo electrónico inválido", safe=False, status=400)
+            return JsonResponse({'mensaje': f'Correo electrónico inválido'}, safe=False, status=400)
         else:
             try:
                 user = User.objects.get(email=data.get("email"))
@@ -518,10 +518,10 @@ def be_an_instructor(request):
                     message = f"Saludos cordiales {user.name} {user.lastname},\n\nNos comunicamos con usted para notificarle que su solicitud para ser Instructor en la plataforma Poli Virtual ha sido aprobada.\n\nGracias,\n\nEl equipo de Poli Virtual."
                     send_email(user.email, subject, message)
 
-                    return JsonResponse("Rol del estudiante actualizado", safe=False, status=200)
+                    return JsonResponse({'mensaje': f'Rol del estudiante actualizado'}, safe=False, status=200)
 
             except User.DoesNotExist:
-                return JsonResponse("Usuario no encontrado", safe=False, status=404)
+                return JsonResponse({'mensaje': f'Usuario no encontrado'}, safe=False, status=404)
 
 
 # Get the user profile
@@ -532,7 +532,7 @@ def get_user_profile(request):
         user_token = verify_token(request) # return the email of the user if the token is valid
 
         if user_token is False:
-            return JsonResponse("Acceso no autorizado", safe=False, status=401)
+            return JsonResponse({'mensaje': f'Acceso no autorizado'}, safe=False, status=401)
         else:
             try:
                 user = User.objects.get(email=user_token)
@@ -548,7 +548,7 @@ def get_user_profile(request):
                 return JsonResponse(user_data, safe=False, status=200)
 
             except User.DoesNotExist:
-                return JsonResponse("Usuario no encontrado", safe=False, status=404)
+                return JsonResponse({'mensaje': f'Usuario no encontrado'}, safe=False, status=404)
 
 
 # Get the instructor profile by the name and lastname
@@ -573,7 +573,7 @@ def get_instructor_profile(request, name_lastname):
             return JsonResponse(instructor_data, safe=False, status=200)
 
         except User.DoesNotExist:
-            return JsonResponse("Usuario no encontrado", safe=False, status=404)
+            return JsonResponse({'mensaje': f'Usuario no encontrado'}, safe=False, status=404)
 
 
 # Get the featured teachers
@@ -601,10 +601,10 @@ def featured_teachers(request):
 
                 return JsonResponse(teachers_data, safe=False, status=200)
             else:
-                return JsonResponse("No hay instructores destacados", safe=False, status=404)
+                return JsonResponse({'mensaje': f'No hay instructores destacados'}, safe=False, status=404)
 
         except User.DoesNotExist:
-            return JsonResponse("No hay instructores disponibles", safe=False, status=404)
+            return JsonResponse({'mensaje': f'No hay instructores disponibles'}, safe=False, status=404)
 
 
 # Get the instructors by key word
@@ -634,12 +634,12 @@ def get_instructors(request, key_word):
                     instructors_to_return.append(instructors_data[index])
 
             if len(instructors_to_return) == 0:
-                return JsonResponse("No hay instructores disponibles", safe=False, status=404)
+                return JsonResponse({'mensaje': f'No hay instructores disponibles'}, safe=False, status=404)
             else:
                 return JsonResponse(instructors_to_return, safe=False, status=200)
 
         except User.DoesNotExist:
-            return JsonResponse("No hay instructores disponibles", safe=False, status=404)
+            return JsonResponse({'mensaje': f'No hay instructores disponibles'}, safe=False, status=404)
 
 
 # Send an email
