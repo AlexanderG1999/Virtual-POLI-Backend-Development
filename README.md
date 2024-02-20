@@ -1,8 +1,14 @@
+# Título del proyecto: Desarrollo Backend de Virtual-POLI, plataforma web diseñada para complementar la educación académica, generado por estudiantes para estudiantes.
+
+# Descripción
+
+# Instalación
+
 # PUNTOS DE ACCESO
 
 ## Usuarios
 
-- `http://127.0.0.1:8000/user/`
+- `http://127.0.0.1:8000/users/`
   - Métodos: `GET`, `PUT`, `DELETE`
   - Descripción: Obtener, actualizar o eliminar información del usuario.
   - Es necesario enviar el `Token de Autenticación` para cada una de estas peticiones.
@@ -60,7 +66,7 @@
   Status: 400 -> Usuario no encontrado
   ```
 
-- `http://127.0.0.1:8000/user/add-last-watched-course/`
+- `http://127.0.0.1:8000/users/last-watched-course/`
   - Método: `POST`
   - Descripción: Agregar el último módulo y tema visto del curso.
   - Es necesario enviar el `Token de Autenticación`.
@@ -80,7 +86,7 @@
   Status: 404 -> Usuario no encontrado.
   ```
 
-- `http://127.0.0.1:8000/user/get-last-watched-course/<str:course_name>/`
+- `http://127.0.0.1:8000/users/last-watched-course/<str:course_name>/`
   - Método: `GET`
   - Descripción: Obtener el último curso visto.
   - Es necesario enviar el `Token de Autenticación`.
@@ -94,7 +100,7 @@
   Status: 404 -> Usuario no encontrado.
   ```
 
-- `http://127.0.0.1:8000/user/is-enrolled-in-course/<str: course_name>/`
+- `http://127.0.0.1:8000/users/is-enrolled-in-course/<str: course_name>/`
   - Método: `GET`
   - Descripción: Verificar si un usuario esta inscrito en un curso.
   - Es necesario enviar el `Token de Autenticación`.
@@ -107,7 +113,7 @@
   Status: 200 -> False, usuario no inscrito en el curso
   ```
 
-- `http://127.0.0.1:8000/user/sign-up/`
+- `http://127.0.0.1:8000/users/sign-up/`
   - Método: `POST`
   - Descripción: Permite el registro de usuarios.
 
@@ -128,10 +134,10 @@
   Status: 200 -> Usuario registrado.
   Status: 400 -> Correo electrónico inválido.
   Status: 400 -> Error al guardar el usuario.
-  Status: 402 -> Usuario ya registrado en BD.
+  Status: 409 -> Usuario ya registrado en BD.
   ```
 
-- `http://127.0.0.1:8000/user/sign-in/`
+- `http://127.0.0.1:8000/users/sign-in/`
   - Método: `POST`
   - Descripción: Iniciar sesión.
 
@@ -151,7 +157,7 @@
   Status: 404 -> Usuario no encontrado.
   ```
 
-- `http://127.0.0.1:8000/user/sign-out/`
+- `http://127.0.0.1:8000/users/sign-out/`
   - Método: `PUT`
   - Descripción: Cerrar la sesión actual del usuario.
   - Se debe enviar el `Token de Autenticación`.
@@ -166,7 +172,7 @@
   Status: 404 -> Usuario no encontrado.
   ```
 
-- `http://127.0.0.1:8000/user/change-password/`
+- `http://127.0.0.1:8000/users/change-password/`
   - Método: `PUT`
   - Descripción: Cambiar contraseña.
   - Se debe enviar el `Token de Autenticación`.
@@ -184,7 +190,7 @@
   Status: 404 -> Usuario no encontrado.
   ```
 
-- `http://127.0.0.1:8000/user/send-email-to-restore-password/`
+- `http://127.0.0.1:8000/users/send-email-to-restore-password/`
   - Método: `PUT`
   - Descripción: Enviar correo para restaurar contraseña.
 
@@ -200,7 +206,7 @@
   Status: 404 -> Usuario no encontrado.
   ```
 
-- `http://127.0.0.1:8000/user/restore-password/`
+- `http://127.0.0.1:8000/users/restore-password/`
   - Método: `PUT`
   - Descripción: Restaurar contraseña.
 
@@ -218,7 +224,7 @@
   Status: 404 -> Usuario no encontrado.
   ```
 
-- `http://127.0.0.1:8000/user/set-email-verification/`
+- `http://127.0.0.1:8000/users/set-email-verification/`
   - Método: `POST`
   - Descripción: Establecer la verificación del correo electrónico del usuario.
 
@@ -234,7 +240,7 @@
   Status: 404 -> Usuario no encontrado.
   ```
 
-- `http://127.0.0.1:8000/user/contact-with-us/`
+- `http://127.0.0.1:8000/users/contact-with-us/`
   - Método: `POST`
   - Descripción: Enviar mensaje para contacto con equipo de Virtual-POLI
 
@@ -251,7 +257,7 @@
   Status: 400 -> Correo electrónico inválido.
   ```
 
-- `http://127.0.0.1:8000/user/send-email-to-approve-teacher/`
+- `http://127.0.0.1:8000/users/send-email-to-approve-teacher/`
   - Método: `PUT`
   - Descripción: Enviar correo para aprobación de ser un instructor.
   - Se debe enviar el `Token de Autenticación`.
@@ -270,7 +276,7 @@
   Status: 404 -> Usuario no encontrado.
   ```
 
-- `http://127.0.0.1:8000/user/be-an-instructor/`
+- `http://127.0.0.1:8000/users/be-an-instructor/`
   - Método: `PUT`
   - Descripción: Actualizar el rol del estudiante.
 
@@ -286,7 +292,7 @@
   Status: 404 -> Usuario no encontrado.
   ```
 
-- `http://127.0.0.1:8000/user/get-user-profile/`
+- `http://127.0.0.1:8000/users/profile/`
   - Método: `GET`
   - Descripción: Obtener la información del usuario.
   - Se debe enviar el `Token de Autenticación`.
@@ -300,7 +306,7 @@
   Status: 404 -> Usuario no encontrado.
   ```
 
-- `http://127.0.0.1:8000/user/get-instructor-profile/<str: name_lastname>/`
+- `http://127.0.0.1:8000/users/instructor-profile/<str: name_lastname>/`
   - Método: `GET`
   - Descripción: Obtener la información de un instructor en función de su nombre y apellido (Nombres-Apellidos)
 
@@ -312,7 +318,7 @@
   Status: 404 -> Usuario no encontrado.
   ```
 
-- `http://127.0.0.1:8000/user/featured-teachers/`
+- `http://127.0.0.1:8000/users/featured-teachers/`
   - Método: `GET`
   - Descripción: Obtener los instructores destacados.
 
@@ -325,7 +331,7 @@
   Status: 404 -> No hay instructores disponibles.
   ```
 
-- `http://127.0.0.1:8000/user/get-instructors/<str:key_word>/`
+- `http://127.0.0.1:8000/users/instructors-by-key-word/<str:key_word>/`
   - Método: `GET`
   - Descripción: Obtener los instructores si la palabra clave esta en el nombre o apellido.
 
@@ -339,7 +345,7 @@
 
 ## Cursos
 
-- `http://127.0.0.1:8000/course/`
+- `http://127.0.0.1:8000/courses/`
   - Método: `POST`
   - Descripción: Crear un curso.
 
@@ -367,7 +373,7 @@
   Status: 404 -> Error al guardar el curso.
   ```
 
-- `http://127.0.0.1:8000/course/<str:id>/`
+- `http://127.0.0.1:8000/courses/<str:id>/`
   - Método: `GET`, `DELETE`
   - Descripción: Obtener un curso o todos y eliminar un curso dado su id.
 
@@ -389,7 +395,7 @@
   Status: 404 -> Curso no encontrado.
   ```
 
-- `http://127.0.0.1:8000/course/courses-by-category/<str:category>/`
+- `http://127.0.0.1:8000/courses/by-category/<str:category>/`
   - Método: `GET`
   - Descripción: Obtener los cursos en función de una categoría.
 
@@ -401,7 +407,7 @@
   Status: 404 -> No hay cursos disponibles.
   ```
 
-- `http://127.0.0.1:8000/course/featured-courses/`
+- `http://127.0.0.1:8000/courses/featured/`
   - Método: `GET`
   - Descripción: Obtener los cursos destacados.
 
@@ -414,7 +420,7 @@
   Status: 404 -> No hay cursos disponibles.
   ```
 
-- `http://127.0.0.1:8000/course/recently-added-courses/`
+- `http://127.0.0.1:8000/courses/recently-added/`
   - Método: `GET`
   - Descripción: Obtener los 5 cursos recientemente agregados.
 
@@ -426,7 +432,7 @@
   Status: 404 -> No hay cursos disponibles.
   ```
 
-- `http://127.0.0.1:8000/course/courses-by-instructor/<str:instructor_name>/`
+- `http://127.0.0.1:8000/courses/by-instructor/<str:instructor_name>/`
   - Método: `GET`
   - Descripción: Obtener los cursos de un instructor.
 
@@ -438,7 +444,7 @@
   Status: 404 -> No hay cursos disponibles.
   ```
 
-- `http://127.0.0.1:8000/course/update-course-comments/<str:id>/`
+- `http://127.0.0.1:8000/courses/comments/<str:id>/`
   - Método: `PUT`
   - Descripción: Actualizar comentarios de un curso mediante el id de este.
   - Se debe enviar el `Token de Autenticación`.
@@ -462,7 +468,7 @@
   Status: 404 -> Curso no encontrado.
   ```
 
-- `http://127.0.0.1:8000/user/get-courses/<str:key_word>/`
+- `http://127.0.0.1:8000/courses/by-key-word/<str:key_word>/`
   - Método: `GET`
   - Descripción: Obtener los cursos si la palabra clave esta en el nombre del curso.
 
@@ -476,7 +482,7 @@
 
 ## Categorías
 
-- `http://127.0.0.1:8000/category/`
+- `http://127.0.0.1:8000/categories/`
   - Método: `POST`, `PUT`
   - Descripción: Crear y actualiza una categoría.
 
@@ -507,7 +513,7 @@
   Status: 404 -> Error al actualizar categoria.
   ```
 
-- `http://127.0.0.1:8000/category/<str:id>/`
+- `http://127.0.0.1:8000/categories/<str:id>/`
   - Método: `GET`, `DELETE`
   - Descripción: Obtiene y elimina una categoría.
 
@@ -529,7 +535,7 @@
   Status: 404 -> Categoria no encontrada.
   ```
 
-- `http://127.0.0.1:8000/category/get_category_id/<str:category_name>/`
+- `http://127.0.0.1:8000/categories/id/<str:category_name>/`
   - Método: `GET`
   - Descripción: Obtiene el id de la categoría.
 
@@ -544,7 +550,7 @@
 
 ## Content
 
-- `http://127.0.0.1:8000/content/`
+- `http://127.0.0.1:8000/contents/`
   - Método: `POST`
   - Descripción: Crea el contenido de un curso.
 
