@@ -44,7 +44,7 @@ Luego, para configurar de manera correcta el presente proyecto se siguen los sig
   pip install -r requirements.txt
   ```
 
-5) Las variables definidas dentro del archivo .env son las siguientes:
+5) Las variables definidas dentro del archivo `.env` son las siguientes:
 ```bash
 # Variables de configuración para proyecto en DJANGO
 DJANGO_SECRET_KEY=''
