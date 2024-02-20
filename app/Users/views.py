@@ -223,7 +223,7 @@ def sign_up(request):
             if existing_user is not None:
                 # Existing user
                 response_data = {'mensaje': f'Este usuario ya existe'}
-                status = 402
+                status = 409
             else:
                 # Hash the password with a random salt
                 data["password"] = make_password(data["password"])
