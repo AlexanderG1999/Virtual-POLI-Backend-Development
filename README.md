@@ -1,6 +1,7 @@
 # Desarrollo Backend de Virtual-POLI, plataforma web diseñada para complementar la educación académica, generado por estudiantes para estudiantes.
 
 ## Descripción
+Desarrollar el backend para una plataforma web orientada a la educación virtual caso de aplicación “Virtual-POLI”.
 
 ## Instalación
 
