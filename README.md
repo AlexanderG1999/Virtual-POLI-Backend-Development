@@ -4,8 +4,89 @@
 Desarrollar el backend para una plataforma web orientada a la educación virtual caso de aplicación “Virtual-POLI”.
 
 ## Instalación
+Para el proyecto se utilizó las siguientes tecnologías y sus respectivas versiones.
 
-## PUNTOS DE ACCESO
+- Python 3.10.6
+- Django 4.1.13
+- MongoDB 7.0.3
+
+Luego, para configurar de manera correcta el presente proyecto se siguen los siguientes pasos:
+
+1) Clonar repositorio.
+  ```bash
+  git clone https://github.com/AlexanderG1999/Virtual-POLI-Backend-Development.git
+  ```
+
+2) Instalar Poetry para la gestión de dependencias.
+  ```bash
+  pip install poetry
+  ```
+
+3) Iniciar entorno virtual de Poetry, donde se encuentren los archivos `poetry.lock` y `pyproject.toml`.
+  ```bash
+  poetry shell
+  ```
+
+4) Instalar dependencias
+  ```bash
+  poetry install
+  ```
+`Nota:` En el caso de existir un error con Poetry, se puede crear un entorno virtual e instalar las dependencias del proyecto mediante el archivo `requirements.txt`.
+
+  ```bash
+  # Crear entorno virtual
+  python -m venv env-backend
+
+  # Iniciar entorno virtual
+  env-backend/Scripts/activate
+
+  # Instalar dependencias del proyecto
+  pip install -r requirements.txt
+  ```
+
+5) Las variables definidas dentro del archivo .env son las siguientes:
+```bash
+# Variables de configuración para proyecto en DJANGO
+DJANGO_SECRET_KEY=''
+DEBUG=
+DATABASE_NAME=''
+
+# Variable secreta de creación de JWT
+SECRET_KEY_TOKEN=''
+
+# URL Frontend
+URL_FRONTEND=''
+
+# URLs para almacenamiento en Bucket S3
+URL_IMAGE_COURSE_STORAGE = ''
+URL_VIDEO_COURSE_STORAGE = ''
+URL_VIDEO_COURSE_CONTENT_STORAGE = ''
+URL_IMAGE_INSTRUCTOR_STORAGE = ''
+
+# Variables para uso de SMTP de Gmail
+EMAIL_HOST=''
+EMAIL_PORT=''
+EMAIL_USE_TLS=''
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+
+# Variables de configuración para el almacenamiento en Bucket S3
+AWS_ACCESS_KEY_ID=''
+AWS_SECRET_ACCESS_KEY=''
+AWS_STORAGE_BUCKET_NAME = ''
+```
+
+6) Realizar migraciones a MongoDB.
+```bash
+python manage.py migrate
+```
+
+7) Ejecutar proyecto.
+```bash
+python manage.py runserver
+```
+
+## Puntos de acceso
 
 ## Usuarios
 
