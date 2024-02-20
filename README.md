@@ -1,10 +1,10 @@
-# Título del proyecto: Desarrollo Backend de Virtual-POLI, plataforma web diseñada para complementar la educación académica, generado por estudiantes para estudiantes.
+#Desarrollo Backend de Virtual-POLI, plataforma web diseñada para complementar la educación académica, generado por estudiantes para estudiantes.
 
-# Descripción
+## Descripción
 
-# Instalación
+## Instalación
 
-# PUNTOS DE ACCESO
+## PUNTOS DE ACCESO
 
 ## Usuarios
 
