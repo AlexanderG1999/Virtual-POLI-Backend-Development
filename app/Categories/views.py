@@ -49,7 +49,7 @@ def category_api(request, id="0"):
     elif request.method == 'PUT':
         data = JSONParser().parse(request)
         try:
-            category = Category.objects.get(id=data['id'])
+            category = Category.objects.get(id=id)
             category_serializer = CategorySerializer(category, data=data, partial=True)
 
             if category_serializer.is_valid():
